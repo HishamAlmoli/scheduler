@@ -1,4 +1,4 @@
-// Imports
+// Imports Part
 import React from "react";
 import "./styles.scss";
 import Header from "./Header";
@@ -11,98 +11,85 @@ import Confirm from "./Confirm";
 import Error from "./Error";
 
 // Appointment function
-export default function Appointment(props) {
+function Appointment(props) {
+
   const EMPTY = "EMPTY";
   const SHOW = "SHOW";
   const CREATE = "CREATE";
   const SAVING = "SAVING";
+  const DELETING = "DELETING";
   const CONFIRM = "CONFIRM";
   const EDIT = "EDIT";
   const ERROR_SAVE = "ERROR_SAVE";
   const ERROR_DELETE = "ERROR_DELETE";
-  const DELETING = "DELETING";
 
-  //destructure the required mode and functions from useVisualMode
   const { mode, transition, back } = useVisualMode(
     props.interview ? SHOW : EMPTY
   );
 
+  function deleteInterview() {
+    transition(DELETING, true);
+    props.cancelInterview(props.id)
+      .then(() => {
+        transition(EMPTY);
+      })
+      .catch(() => transition(ERROR_DELETE, true))
+  }
+
   function save(name, interviewer) {
     const interview = {
       student: name,
-      interviewer,
+      interviewer
     };
-    transition(SAVING);
 
-    //in Application.js, we used return axios which will return a promise, so we need to use .then() here,  .then uses an anonymous callback function
-    props
-      .bookInterview(props.id, interview)
+    transition(SAVING);
+    props.bookInterview(props.id, interview)
       .then(() => {
         transition(SHOW);
       })
       .catch(() => transition(ERROR_SAVE, true));
   }
 
-  //remove function
-  function remove() {
-    transition(DELETING, true);
-
-    props
-      .cancelInterview(props.id)
-      .then(() => transition(EMPTY))
-      .catch(() => {
-        transition(ERROR_DELETE, true);
-      });
-  }
-
   return (
     <article className="appointment" data-testid="appointment">
       <Header time={props.time} />
-      {mode === EMPTY && <Empty onAdd={() => transition(CREATE)} />}
-      {mode === SHOW && (
-        <Show
-          interview={props.interview}
-          onDelete={() => transition(CONFIRM)}
-          //for editing the appointment
-          onEdit={() => transition(EDIT)}
-        />
-      )}
       {mode === CREATE && (
         <Form
-          interviewer={props.interviewer}
           interviewers={props.interviewers}
-          onCancel={() => back(EMPTY)}
-          bookInterview={props.bookInterview}
+          onCancel={back}
           onSave={save}
         />
       )}
-      {mode === SAVING && <Status message="Saving" />}
-      {mode === CONFIRM && (
-        <Confirm
-          onConfirm={remove}
-          onCancel={back}
-          message="Are you sure you would like to delete?"
+      {mode === EMPTY && <Empty onAdd={() => transition(CREATE)} />}
+      {mode === SHOW && (
+        <Show
+          student={props.interview.student}
+          interviewer={props.interview.interviewer}
+          onDelete={() => transition(CONFIRM)}
+          onEdit={() => transition(EDIT)}
         />
       )}
-
+      {mode === SAVING && <Status message={"Saving"} />}
+      {mode === DELETING && <Status message={"DELETING"} />}
+      {mode === CONFIRM && (
+        <Confirm
+          message="Are you sure you want to delete this appointment?"
+          onCancel={back}
+          onConfirm={deleteInterview}
+        />
+      )}
+      {mode === ERROR_SAVE && <Error onClose={back} message="Could not save appointment"/>}
+      {mode === ERROR_DELETE && <Error onClose={back} message="Could not delete appointment"/>}
       {mode === EDIT && (
         <Form
-          name={props.name ? props.name : props.interview.student}
+          student={props.interview.student}
           interviewer={props.interview.interviewer.id}
           interviewers={props.interviewers}
           onSave={save}
           onCancel={back}
         />
-      )}
-      {mode === DELETING && <Status message="Deleting" />}
-
-      {mode === ERROR_SAVE && (
-        <Error message="Could not save appointment." onClose={back} />
-      )}
-
-      {mode === ERROR_DELETE && (
-        <Error message="Could not cancel appointment." onClose={back} />
-      )}
+    )}
     </article>
-  );
+  )
 }
+export default Appointment;
