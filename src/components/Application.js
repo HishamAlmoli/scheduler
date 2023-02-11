@@ -1,4 +1,4 @@
-// Imports
+// Imports 
 import React from "react";
 import useApplicationData from "hooks/useApplicationData";
 import "components/Application.scss";
