@@ -1,8 +1,8 @@
-// Imports
+// Imports Part
 import React from "react";
 
 // Status function
-export default function Status(props) {
+function Status(props) {
   return (
     <main className="appointment__card appointment__card--status">
       <img
@@ -10,7 +10,10 @@ export default function Status(props) {
         src="images/status.png"
         alt="Loading"
       />
-      <h1 className="text--semi-bold">{props.message}</h1>
+      <h1 className="text--semi-bold">
+        {props.message}
+      </h1>
     </main>
   );
 }
+export default Status;
