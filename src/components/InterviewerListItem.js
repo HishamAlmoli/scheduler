@@ -5,7 +5,7 @@ import classnames from "classnames";
 
 // InterviewerListItem function
 function InterviewerListItem(props) {
-  const interviewerClass = classNames("interviewers__item", {
+  const interviewerClass = classnames("interviewers__item", {
     "interviewers__item--selected": props.selected
   })
   return (
